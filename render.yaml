@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: acgcs-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: standard
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: PORT
+        value: 8000
+      - key: MAX_CONCURRENT_ANALYZE
+        value: 1
+      - key: EMBEDDING_CACHE_MAX_SIZE
+        value: 3000
+      - key: OCR_THREAD_POOL_WORKERS
+        value: 1
+      - key: LOW_MEMORY_MODE
+        value: true
+      - key: LAZY_LOAD_MODELS
+        value: true
+      - key: ENABLE_PLAYWRIGHT
+        value: false
+      - key: ANALYZE_TIMEOUT_SEC
+        value: 150
+      - key: OMP_NUM_THREADS
+        value: 1
+      - key: MKL_NUM_THREADS
+        value: 1
+      - key: TORCH_NUM_THREADS
+        value: 1
+      - key: MAX_ZIP_SIZE_MB
+        value: 50
+      - key: MAX_FILES_IN_ZIP
+        value: 100
+      - key: ZIP_ANALYZE_TIMEOUT_SEC
+        value: 300
+      - key: IMAGE_DOWNLOAD_CAP_MB
+        value: 25
+      - key: IMAGE_MAX_DIMENSION
+        value: 1920
