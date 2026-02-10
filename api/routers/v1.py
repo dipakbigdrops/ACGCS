@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import JSONResponse
 
 from api.config import (
     ANALYZE_QUEUE_LIMIT,
@@ -84,12 +85,23 @@ async def upload_guidelines(
     guidelines_id = str(uuid.uuid4())
     store.set(guidelines_id, rules, filename or "guidelines.pdf", ttl_hours=24, pdf_bytes=pdf_bytes)
     logger.info("Guidelines uploaded. ID: %s, rules: %s, file: %s", guidelines_id, len(rules), filename)
-    return {
+    content = {
         "guidelines_id": guidelines_id,
         "rules_count": len(rules),
         "filename": filename,
         "message": "Guidelines uploaded and processed successfully",
     }
+    response = JSONResponse(content=content)
+    secure = request.url.scheme == "https"
+    response.set_cookie(
+        key="acgcs_guidelines_id",
+        value=guidelines_id,
+        max_age=60,
+        path="/",
+        samesite="none" if secure else "lax",
+        secure=secure,
+    )
+    return response
 
 
 @router.post("/analyze")
@@ -108,6 +120,8 @@ async def analyze_compliance(
     analyze_semaphore = deps.analyze_semaphore
     store.cleanup_expired()
     if not guidelines_id or not str(guidelines_id).strip():
+        guidelines_id = (request.cookies.get("acgcs_guidelines_id") or "").strip()
+    if not guidelines_id:
         store.ensure_default_loaded()
         guidelines_id = DEFAULT_GUIDELINES_ID
 
@@ -527,9 +541,11 @@ async def analyze_zip_compliance(
     store.cleanup_expired()
     
     if not guidelines_id or not str(guidelines_id).strip():
+        guidelines_id = (request.cookies.get("acgcs_guidelines_id") or "").strip()
+    if not guidelines_id:
         store.ensure_default_loaded()
         guidelines_id = DEFAULT_GUIDELINES_ID
-    
+
     guidelines_data = store.get(guidelines_id)
     if not guidelines_data:
         raise HTTPException(

@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     libgomp1 \
     wget \
+    fonts-unifont \
+    fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt constraints.txt ./
@@ -18,8 +20,7 @@ COPY requirements.txt constraints.txt ./
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -c constraints.txt -r requirements.txt
 
-RUN playwright install chromium && \
-    playwright install-deps chromium
+RUN playwright install chromium
 
 COPY . .
 

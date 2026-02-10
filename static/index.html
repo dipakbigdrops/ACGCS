@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guideline Compliance Checker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181c;
+      --surface-hover: #1e1e24;
+      --border: #2a2a32;
+      --text: #e4e4e7;
+      --text-muted: #a1a1aa;
+      --accent: #22d3ee;
+      --accent-dim: #0891b2;
+      --success: #34d399;
+      --error: #f87171;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34, 211, 238, 0.06), transparent);
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.5rem;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      color: var(--text);
+    }
+
+    .card .hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    input[type="file"]:hover {
+      border-color: var(--accent-dim);
+      background: var(--surface-hover);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.65rem 1.25rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.05s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-dim);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--surface-hover);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--border);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .message {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .message.visible {
+      display: block;
+    }
+
+    .message.success {
+      background: rgba(52, 211, 153, 0.15);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: var(--success);
+    }
+
+    .message.error {
+      background: rgba(248, 113, 113, 0.15);
+      border: 1px solid rgba(248, 113, 113, 0.4);
+      color: var(--error);
+    }
+
+    #resultBlock {
+      margin-top: 1.5rem;
+    }
+
+    .result-pass {
+      background: rgba(52, 211, 153, 0.15);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: var(--success);
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      font-weight: 500;
+    }
+
+    .result-fail {
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+    }
+
+    .result-fail .summary {
+      color: var(--error);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .violation {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .violation .rule {
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .violation .evidence {
+      color: var(--text-muted);
+    }
+
+    .zip-summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .zip-summary.pass {
+      border-color: rgba(52, 211, 153, 0.4);
+      color: var(--success);
+    }
+
+    .zip-summary.fail {
+      border-color: rgba(248, 113, 113, 0.4);
+      color: var(--error);
+    }
+
+    .file-result {
+      margin-top: 0.5rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border-left: 3px solid var(--border);
+    }
+
+    .file-result.pass {
+      border-left-color: var(--success);
+      background: rgba(52, 211, 153, 0.08);
+    }
+
+    .file-result.fail {
+      border-left-color: var(--error);
+      background: rgba(248, 113, 113, 0.08);
+    }
+
+    .file-result .path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: -0.2em;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Guideline Compliance Checker</h1>
+      <p class="subtitle">Upload guidelines (optional) and a creative document to check compliance</p>
+    </header>
+
+    <div class="card">
+      <h2>API URL</h2>
+      <p class="hint">Base URL of the compliance API (e.g. http://localhost:8000 or your Render URL). Leave blank if this page is served from the same host as the API.</p>
+      <input type="text" id="apiBaseInput" placeholder="http://localhost:8000">
+    </div>
+
+    <div class="card">
+      <h2>1. Guidelines (optional)</h2>
+      <p class="hint">Upload a PDF with your brand guidelines. If you skip this, the default guidelines are used.</p>
+      <label for="guidelinesFile">Guidelines PDF</label>
+      <input type="file" id="guidelinesFile" accept=".pdf">
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="uploadGuidelinesBtn">Upload guidelines</button>
+      </div>
+      <div id="guidelinesMessage" class="message"></div>
+    </div>
+
+    <div class="card">
+      <h2>2. Creative document</h2>
+      <p class="hint">Upload an HTML file, image (PNG, JPG, etc.), or a ZIP of creatives to analyze.</p>
+      <label for="creativeFile">Document (HTML, image, or ZIP)</label>
+      <input type="file" id="creativeFile" accept=".html,.htm,.png,.jpg,.jpeg,.gif,.bmp,.webp,.zip">
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="analyzeBtn">Analyze</button>
+      </div>
+      <div id="analyzeMessage" class="message"></div>
+      <div id="resultBlock"></div>
+    </div>
+
+    <footer>
+      <a href="/docs">API docs</a> &middot; <a href="/">API root</a>
+    </footer>
+  </div>
+
+  <script>
+    function getApiBase() {
+      var val = document.getElementById('apiBaseInput').value.trim();
+      if (val) return val.replace(/\/$/, '');
+      if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) return '';
+      return 'http://localhost:8000';
+    }
+
+    function showMessage(el, type, html) {
+      el.innerHTML = html;
+      el.className = 'message visible ' + type;
+    }
+
+    function hideMessage(el) {
+      el.className = 'message';
+      el.innerHTML = '';
+    }
+
+    function setLoading(btn, loading) {
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Please wait...';
+      } else {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.label || 'Submit';
+      }
+    }
+
+    document.getElementById('uploadGuidelinesBtn').dataset.label = 'Upload guidelines';
+    document.getElementById('analyzeBtn').dataset.label = 'Analyze';
+
+    document.getElementById('uploadGuidelinesBtn').addEventListener('click', async function () {
+      const fileInput = document.getElementById('guidelinesFile');
+      const msgEl = document.getElementById('guidelinesMessage');
+      const btn = document.getElementById('uploadGuidelinesBtn');
+      const formData = new FormData();
+      if (fileInput.files.length) formData.append('guidelines_pdf', fileInput.files[0]);
+
+      setLoading(btn, true);
+      hideMessage(msgEl);
+      try {
+        const r = await fetch(getApiBase() + '/v1/upload-guidelines', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const detail = Array.isArray(data.detail) ? data.detail.join(' ') : (data.detail || 'Upload failed');
+          showMessage(msgEl, 'error', typeof detail === 'string' ? detail : JSON.stringify(detail));
+          return;
+        }
+        const id = data.guidelines_id || '';
+        try { sessionStorage.setItem('acgcs_guidelines_id', id); } catch (e) {}
+        showMessage(msgEl, 'success', data.message || 'Guidelines uploaded. This will be used automatically for the next analysis.');
+      } catch (e) {
+        showMessage(msgEl, 'error', 'Network error: ' + e.message);
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+
+    document.getElementById('analyzeBtn').addEventListener('click', async function () {
+      const fileInput = document.getElementById('creativeFile');
+      var guidelinesId = '';
+      try { guidelinesId = sessionStorage.getItem('acgcs_guidelines_id') || ''; } catch (e) {}
+      const msgEl = document.getElementById('analyzeMessage');
+      const resultBlock = document.getElementById('resultBlock');
+      const btn = document.getElementById('analyzeBtn');
+
+      if (!fileInput.files.length) {
+        showMessage(msgEl, 'error', 'Please select a document to analyze.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('creative_file', fileInput.files[0]);
+      if (guidelinesId) formData.append('guidelines_id', guidelinesId);
+
+      setLoading(btn, true);
+      hideMessage(msgEl);
+      resultBlock.innerHTML = '';
+      try {
+        const r = await fetch(getApiBase() + '/v1/analyze', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const detail = Array.isArray(data.detail) ? data.detail.join(' ') : (data.detail || 'Analysis failed');
+          showMessage(msgEl, 'error', typeof detail === 'string' ? detail : JSON.stringify(detail));
+          return;
+        }
+        hideMessage(msgEl);
+
+        if (data.overall_status !== undefined) {
+          resultBlock.innerHTML = '<div class="zip-summary ' + data.overall_status + '">' + (data.summary || '') + '</div>';
+          (data.results || []).forEach(function (f) {
+            const div = document.createElement('div');
+            div.className = 'file-result ' + f.status;
+            let content = '<span class="path">' + f.file_path + '</span> ' + (f.status === 'pass' ? 'Passed' : 'Failed');
+            if (f.violations && f.violations.length) {
+              content += '<div class="violation" style="margin-top:0.5rem">';
+              f.violations.forEach(function (v) {
+                content += '<div class="rule">' + (v.rule_type || '') + '</div>';
+                content += '<div class="evidence">' + (v.evidence_text || '') + '</div>';
+              });
+              content += '</div>';
+            }
+            div.innerHTML = content;
+            resultBlock.appendChild(div);
+          });
+        } else {
+          if (data.message === 'All guidelines are followed') {
+            resultBlock.innerHTML = '<div class="result-pass">All guidelines are followed.</div>';
+          } else {
+            let html = '<div class="result-fail"><div class="summary">Violations found</div>';
+            (data.message || []).forEach(function (v) {
+              html += '<div class="violation">';
+              html += '<div class="rule">' + (v.rule_type || '') + '</div>';
+              html += '<div class="evidence">' + (v.evidence_text || '') + '</div>';
+              html += '</div>';
+            });
+            html += '</div>';
+            resultBlock.innerHTML = html;
+          }
+        }
+      } catch (e) {
+        showMessage(msgEl, 'error', 'Network error: ' + e.message);
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+  </script>
+</body>
+</html>
