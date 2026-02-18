@@ -15,10 +15,11 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
+COPY requirements.txt requirements-docker.txt ./
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+    (pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu torch==2.1.0+cpu || pip install --no-cache-dir "torch==2.1.0") && \
+    pip install --no-cache-dir -r requirements-docker.txt
 
 RUN playwright install chromium
 
